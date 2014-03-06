@@ -179,7 +179,7 @@ static NSString * const kTableViewCellContentView = @"UITableViewCellContentView
     [scrollViewButtonViewLeft setFrame:CGRectMake([self leftUtilityButtonsWidth], 0, [self leftUtilityButtonsWidth], self.height)];
     
     [self.cellScrollView insertSubview:scrollViewButtonViewLeft belowSubview:self.scrollViewContentView];
-
+    
     [departingLeftButtons removeFromSuperview];
     [scrollViewButtonViewLeft populateUtilityButtons];
     
@@ -193,7 +193,7 @@ static NSString * const kTableViewCellContentView = @"UITableViewCellContentView
     SWUtilityButtonView *scrollViewButtonViewRight = [[SWUtilityButtonView alloc] initWithUtilityButtons:rightUtilityButtons
                                                                                               parentCell:self
                                                                                    utilityButtonSelector:@selector(rightUtilityButtonHandler:)];
-
+    
     self.scrollViewButtonViewRight = scrollViewButtonViewRight;
     [scrollViewButtonViewRight setFrame:CGRectMake(CGRectGetWidth(self.bounds), 0, [self rightUtilityButtonsWidth], self.height)];
     
@@ -396,6 +396,24 @@ static NSString * const kTableViewCellContentView = @"UITableViewCellContentView
     }
 }
 
+-(void)showAllUtilityButtonsAnimated:(BOOL)animated
+{
+    if (_cellState == kCellStateLeft)
+        return;
+    // Scroll back to center
+    
+    // Force the scroll back to run on the main thread because of weird scroll view bugs
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.cellScrollView setContentOffset:CGPointMake([self rightUtilityButtonsWidth], 0) animated:YES];
+    });
+    _cellState = kCellStateLeft;
+    
+    if ([self.delegate respondsToSelector:@selector(swipeableTableViewCell:scrollingToState:)])
+    {
+        [self.delegate swipeableTableViewCell:self scrollingToState:kCellStateLeft];
+    }
+}
+
 
 #pragma mark - Setup helpers
 
@@ -447,7 +465,7 @@ static NSString * const kTableViewCellContentView = @"UITableViewCellContentView
     {
         [self.delegate swipeableTableViewCell:self scrollingToState:kCellStateRight];
     }
-
+    
     if ([self.delegate respondsToSelector:@selector(swipeableTableViewCellShouldHideUtilityButtonsOnSwipe:)])
     {
         for (SWTableViewCell *cell in [self.containingTableView visibleCells]) {
@@ -465,7 +483,7 @@ static NSString * const kTableViewCellContentView = @"UITableViewCellContentView
     
     self.longPressGestureRecognizer.enabled = YES;
     self.tapGestureRecognizer.enabled = NO;
-
+    
     if ([self.delegate respondsToSelector:@selector(swipeableTableViewCell:scrollingToState:)])
     {
         [self.delegate swipeableTableViewCell:self scrollingToState:kCellStateCenter];
