@@ -402,8 +402,10 @@ static NSString * const kTableViewCellContentView = @"UITableViewCellContentView
         return;
     // Scroll back to center
     
+    
     // Force the scroll back to run on the main thread because of weird scroll view bugs
-    dispatch_async(dispatch_get_main_queue(), ^{
+    // Delay execution of my block for .5 seconds.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         [self.cellScrollView setContentOffset:CGPointMake([self rightUtilityButtonsWidth], 0) animated:YES];
     });
     _cellState = kCellStateLeft;
